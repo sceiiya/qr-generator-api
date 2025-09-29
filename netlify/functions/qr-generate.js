@@ -1,5 +1,4 @@
-const QRCode = require('qrcode');
-
+// Simple QR Code API using external service
 exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -48,25 +47,18 @@ exports.handler = async (event, context) => {
         qrData = url.toString();
       }
 
-      const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
-        margin: 1,
-        color: { dark: '#000000', light: '#FFFFFF' },
-        width: 256,
-      });
-
-      const base64Data = qrCodeDataUrl.split(',')[1];
-      const buffer = Buffer.from(base64Data, 'base64');
-
+      // Use external QR code service
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(qrData)}`;
+      
+      // Redirect to QR code service
       return {
-        statusCode: 200,
+        statusCode: 302,
         headers: {
           ...headers,
-          'Content-Type': 'image/png',
-          'Content-Length': buffer.length.toString(),
+          'Location': qrCodeUrl,
           'Cache-Control': 'public, max-age=3600',
         },
-        body: buffer.toString('base64'),
-        isBase64Encoded: true,
+        body: '',
       };
     }
 
@@ -86,16 +78,16 @@ exports.handler = async (event, context) => {
 
       const data = { provider, account_number, account_name };
       const qrData = JSON.stringify(data);
-      const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
-        margin: 1,
-        color: { dark: '#000000', light: '#FFFFFF' },
-        width: 256,
-      });
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(qrData)}`;
 
       return {
         statusCode: 200,
         headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ qrCode: qrCodeDataUrl, data: data }),
+        body: JSON.stringify({ 
+          qrCode: qrCodeUrl, 
+          data: data,
+          note: 'QR code generated using external service'
+        }),
       };
     }
 

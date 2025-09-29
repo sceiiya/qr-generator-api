@@ -1,5 +1,4 @@
-const QRCode = require('qrcode');
-
+// Simple QR Code URL API using external service
 exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -33,19 +32,16 @@ exports.handler = async (event, context) => {
       url.searchParams.set('account_number', data.account_number);
       url.searchParams.set('account_name', data.account_name);
       
-      const qrCodeDataUrl = await QRCode.toDataURL(url.toString(), {
-        margin: 1,
-        color: { dark: '#000000', light: '#FFFFFF' },
-        width: 256,
-      });
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent(url.toString())}`;
 
       return {
         statusCode: 200,
         headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          qrCode: qrCodeDataUrl,
+          qrCode: qrCodeUrl,
           url: url.toString(),
           data: data,
+          note: 'QR code generated using external service'
         }),
       };
     }
