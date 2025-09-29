@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code API</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .endpoint {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        .get { background: #28a745; color: white; }
+        .post { background: #007bff; color: white; }
+        .code {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .example {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .qr-result {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .qr-result img {
+            max-width: 256px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 QR Code API</h1>
+        <p>A serverless API service for generating QR codes with embedded data</p>
+        <p><strong>Version:</strong> 1.0.0</p>
+    </div>
+
+    <div class="endpoint">
+        <h3><span class="method get">GET</span>/api/qr-generate</h3>
+        <p>Generate QR code image directly from URL parameters</p>
+        <div class="code">
+GET /api/qr-generate?type=json&provider=GCASH&account_number=9873297&account_name=gladmad%20wiver
+        </div>
+        <div class="example">
+            <strong>Parameters:</strong><br>
+            • <code>type</code> (required): "json" or "url"<br>
+            • <code>provider</code> (required): Payment provider name<br>
+            • <code>account_number</code> (required): Account number<br>
+            • <code>account_name</code> (required): Account holder name
+        </div>
+        <button class="test-button" onclick="testGetEndpoint()">Test GET Endpoint</button>
+    </div>
+
+    <div class="endpoint">
+        <h3><span class="method post">POST</span>/api/qr-generate</h3>
+        <p>Generate QR code with JSON data embedded</p>
+        <div class="code">
+POST /api/qr-generate
+Content-Type: application/json
+
+{
+  "provider": "GCASH",
+  "account_number": "9873297",
+  "account_name": "gladmad wiver"
+}
+        </div>
+        <button class="test-button" onclick="testPostEndpoint()">Test POST Endpoint</button>
+    </div>
+
+    <div class="endpoint">
+        <h3><span class="method post">POST</span>/api/qr-generate-url</h3>
+        <p>Generate QR code with URL containing query parameters</p>
+        <div class="code">
+POST /api/qr-generate-url
+Content-Type: application/json
+
+{
+  "provider": "GCASH",
+  "account_number": "9873297",
+  "account_name": "gladmad wiver"
+}
+        </div>
+        <button class="test-button" onclick="testPostUrlEndpoint()">Test POST URL Endpoint</button>
+    </div>
+
+    <div id="qr-result" class="qr-result" style="display: none;">
+        <h3>Generated QR Code:</h3>
+        <img id="qr-image" src="" alt="Generated QR Code">
+    </div>
+
+    <script>
+        async function testGetEndpoint() {
+            const url = '/api/qr-generate?type=json&provider=GCASH&account_number=9873297&account_name=gladmad%20wiver';
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const imageUrl = URL.createObjectURL(blob);
+                    document.getElementById('qr-image').src = imageUrl;
+                    document.getElementById('qr-result').style.display = 'block';
+                } else {
+                    alert('Error: ' + response.statusText);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function testPostEndpoint() {
+            const url = '/api/qr-generate';
+            const data = {
+                provider: 'GCASH',
+                account_number: '9873297',
+                account_name: 'gladmad wiver'
+            };
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('qr-image').src = result.qrCode;
+                    document.getElementById('qr-result').style.display = 'block';
+                } else {
+                    alert('Error: ' + response.statusText);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function testPostUrlEndpoint() {
+            const url = '/api/qr-generate-url';
+            const data = {
+                provider: 'GCASH',
+                account_number: '9873297',
+                account_name: 'gladmad wiver'
+            };
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    document.getElementById('qr-image').src = result.qrCode;
+                    document.getElementById('qr-result').style.display = 'block';
+                } else {
+                    alert('Error: ' + response.statusText);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
