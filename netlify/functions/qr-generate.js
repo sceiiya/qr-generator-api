@@ -1,25 +1,18 @@
 const QRCode = require('qrcode');
 
 exports.handler = async (event, context) => {
-  // Set CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   };
 
-  // Handle preflight requests
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: '',
-    };
+    return { statusCode: 200, headers, body: '' };
   }
 
   try {
     if (event.httpMethod === 'GET') {
-      // Handle GET request with query parameters
       const { type, provider, account_number, account_name } = event.queryStringParameters || {};
 
       if (!type || !provider || !account_number || !account_name) {
@@ -57,10 +50,7 @@ exports.handler = async (event, context) => {
 
       const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
         margin: 1,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF',
-        },
+        color: { dark: '#000000', light: '#FFFFFF' },
         width: 256,
       });
 
@@ -81,7 +71,6 @@ exports.handler = async (event, context) => {
     }
 
     if (event.httpMethod === 'POST') {
-      // Handle POST request with JSON body
       const body = JSON.parse(event.body || '{}');
       const { provider, account_number, account_name } = body;
 
@@ -99,20 +88,14 @@ exports.handler = async (event, context) => {
       const qrData = JSON.stringify(data);
       const qrCodeDataUrl = await QRCode.toDataURL(qrData, {
         margin: 1,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF',
-        },
+        color: { dark: '#000000', light: '#FFFFFF' },
         width: 256,
       });
 
       return {
         statusCode: 200,
         headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          qrCode: qrCodeDataUrl,
-          data: data,
-        }),
+        body: JSON.stringify({ qrCode: qrCodeDataUrl, data: data }),
       };
     }
 

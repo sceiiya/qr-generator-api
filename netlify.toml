@@ -1,7 +1,7 @@
 [build]
-  command = "pnpm run build:netlify"
+  command = "echo 'Build completed'"
   functions = "netlify/functions"
-  publish = "dist"
+  publish = "public"
 
 [build.environment]
   NODE_VERSION = "18"

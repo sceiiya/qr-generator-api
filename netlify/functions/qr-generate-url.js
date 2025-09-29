@@ -1,25 +1,18 @@
 const QRCode = require('qrcode');
 
 exports.handler = async (event, context) => {
-  // Set CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   };
 
-  // Handle preflight requests
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: '',
-    };
+    return { statusCode: 200, headers, body: '' };
   }
 
   try {
     if (event.httpMethod === 'POST') {
-      // Handle POST request with JSON body
       const body = JSON.parse(event.body || '{}');
       const { provider, account_number, account_name } = body;
 
@@ -35,7 +28,6 @@ exports.handler = async (event, context) => {
 
       const data = { provider, account_number, account_name };
       
-      // Create a URL with the data as query parameters
       const url = new URL('data:application/json');
       url.searchParams.set('provider', data.provider);
       url.searchParams.set('account_number', data.account_number);
@@ -43,10 +35,7 @@ exports.handler = async (event, context) => {
       
       const qrCodeDataUrl = await QRCode.toDataURL(url.toString(), {
         margin: 1,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF',
-        },
+        color: { dark: '#000000', light: '#FFFFFF' },
         width: 256,
       });
 
